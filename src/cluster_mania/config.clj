@@ -3,13 +3,12 @@
             [clojure.string :as string]
             [environ.core :as env]))
 
-(def default-config-path "~/.cluster_mania_config.edn")
-
-(defn config-path []
-  (or (env/env :cluster-mania-config-path) default-config-path))
+(def default-config-path "~/.cluster_mania_config")
 
 (defn- read-config []
-  (edn/read-string (slurp (config-path))))
+  (edn/read-string
+    (slurp
+      (env/env :cluster-mania-config-path default-config-path))))
 
 (def defaults
   {:default-port 6174

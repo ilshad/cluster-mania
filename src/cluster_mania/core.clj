@@ -8,4 +8,5 @@
         nodes (config/nodes config)
         state (atom state)
         secret (secret/secret)]
+    
     {:state state :nodes nodes}))
