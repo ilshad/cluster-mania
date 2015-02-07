@@ -5,7 +5,7 @@
 
 (def default-config-path "~/.cluster_mania_config.edn")
 
-(defn- config-path []
+(defn config-path []
   (or (env/env :cluster-mania-config-path) default-config-path))
 
 (defn- read-config []
