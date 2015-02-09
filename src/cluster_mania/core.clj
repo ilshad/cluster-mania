@@ -1,22 +1,19 @@
 (ns cluster-mania.core
-  (:require [cluster-mania.config :as c]
-            [cluster-mania.security :as security]
+  (:require [cluster-mania.config :as config]
             [cluster-mania.server :as server]
-            [cluster-mania.message :as message]
-            [cluster-mania.state :as state]
-            [cluster-mania.log :as log]))
+            [cluster-mania.security :refer [authorize]]
+            [cluster-mania.message :refer [parse]]
+            [cluster-mania.state :refer [route]]
+            [cluster-mania.log :refer [log]]))
 
-(defn start [spec]
-  (let [states (atom spec)
-        conf (c/config)
-        nodes (c/nodes conf)
-        secret (security/secret)]
+(defn start [states]
+  (let [conf (config/config)
+        nodes (config/nodes conf)]
     (server/start (:server-port conf)
-      (-> state/handler
-          (state/route states)
-          (security/authorize secret)
-          message/parse
-          log/log))))
+      (-> (route states)
+          authorize
+          parse
+          log))))
 
 (defn stop [s]
   (server/stop s))
