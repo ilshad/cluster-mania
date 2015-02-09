@@ -1,6 +1,7 @@
 (ns cluster-mania.core
   (:require [cluster-mania.config :as config]
             [cluster-mania.server :as server]
+            [cluster-mania.nodes :as nodes]
             [cluster-mania.security :refer [authorize]]
             [cluster-mania.message :refer [parse]]
             [cluster-mania.state :refer [route]]
@@ -8,12 +9,11 @@
 
 (defn start [states]
   (let [conf (config/config)
-        nodes (config/nodes conf)]
-    (server/start (:server-port conf)
-      (-> (route states)
-          authorize
-          parse
-          log))))
+        handler (-> (route states) authorize parse log)
+        server (server/start conf handler)
+        nodes (nodes/start conf)]
+    [server nodes]))
 
-(defn stop [s]
-  (server/stop s))
+(defn stop [[server nodes]]
+  (server/stop server)
+  (nodes/stop nodes))

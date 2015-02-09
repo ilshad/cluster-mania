@@ -25,8 +25,8 @@
                  (sender s))))))
     run?))
 
-(defn start [port handler]
-  (run :port port
+(defn start [conf handler]
+  (run :port (:server-port conf)
        :handler handler
        :receiver text-receiver
        :sender text-sender))

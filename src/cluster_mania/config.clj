@@ -10,14 +10,6 @@
     (slurp
       (env/env :cluster-mania-config-path default-config-path))))
 
-(def defaults
-  {:default-port 6174
-   :server-port 6174
-   :nodes []})
-
-(defn config []
-  (merge defaults (read-config)))
-
 (defn- parse-port [s]
   (when-not (empty? s)
     (try
@@ -26,8 +18,19 @@
         (throw
           (java.lang.IllegalArgumentException. "Port must be integer."))))))
 
-(defn nodes [config]
-  (into {}
-    (for [s (:nodes config)]
+(defn- parse-nodes [conf]
+  (vec
+    (for [s (:nodes conf)]
       (let [[host port] (string/split s #":")]
-        [host (or (parse-port port) (:default-port config))]))))
+        {:host host
+         :port (or (parse-port port) (:default-port conf))}))))
+
+(def defaults
+  {:default-port 6174
+   :server-port 6174
+   :health-check-interval 60000
+   :nodes []})
+
+(defn config []
+  (let [conf (merge defaults (read-config))]
+    (assoc conf :nodes (parse-nodes conf))))
