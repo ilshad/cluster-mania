@@ -1,25 +1,22 @@
 (ns cluster-mania.core
   (:require [cluster-mania.config :as c]
-            [cluster-mania.security :as s]
-            [cluster-mania.server :as server]))
+            [cluster-mania.security :as security]
+            [cluster-mania.server :as server]
+            [cluster-mania.message :as message]
+            [cluster-mania.state :as state]
+            [cluster-mania.log :as log]))
 
-(def parse-message identity)
-
-(defn swap-fn [target]
-  (case (:type target)
-    :map (fn [m {:keys [ks value]}] (assoc-in m ks value))))
-
-(defn start [state]
-  (let [state (atom state)
+(defn start [spec]
+  (let [states (atom spec)
         conf (c/config)
         nodes (c/nodes conf)
-        secret (s/secret)]
+        secret (security/secret)]
     (server/start (:server-port conf)
-      (fn [req]
-        (let [msg (parse-message req)]
-          (when (s/authorized? msg secret)
-            (when-let [target (state (:key msg))]
-              (swap! (:atom target) (swap-fn target) msg))))))))
+      (-> state/handler
+          (state/dispatch states)
+          (security/authorize secret)
+          message/parse
+          log/log))))
 
 (defn stop [s]
   (server/stop s))

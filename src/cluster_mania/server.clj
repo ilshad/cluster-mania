@@ -10,6 +10,9 @@
     (.write message)
     (.flush)))
 
+(defn- request [s]
+  {:raw s})
+
 (defn- run [& {:keys [port handler receiver sender]}]
   (let [run? (atom true)]
     (future
@@ -17,7 +20,8 @@
         (while @run?
           (with-open [s (.accept socket)]
             (->> (receiver s)
-                 (handler)
+                 request
+                 handler
                  (sender s))))))
     run?))
 

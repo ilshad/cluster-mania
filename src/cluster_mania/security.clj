@@ -6,5 +6,8 @@
 (defn secret []
   (slurp (env/env :cluster-mania-secret-path default-secret-path)))
 
-(defn authorized? [message secret]
-  (= (:secret message) secret))
+(defn authorize [handler secret]
+  (fn [request]
+    (if (= (:secret request) secret)
+      (handler request)
+      {:message "Unauthorized Request"})))
