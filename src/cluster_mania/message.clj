@@ -1,5 +1,5 @@
 (ns cluster-mania.message)
 
 (defn parse [handler]
-  (fn [request]
-    (handler (assoc request :message (:raw request)))))
+  (fn [req]
+    (handler (assoc req :message (:raw req)))))

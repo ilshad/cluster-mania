@@ -5,13 +5,13 @@
     :map (fn [state message]
            (assoc-in state (:path message) (:value message)))))
 
-(defn handler [request]
-  (let [state (:state request)]
-    (swap! (:atom state) (update-fn state) (:message request))
+(defn handler [req]
+  (let [state (:state req)]
+    (swap! (:atom state) (update-fn state) (:message req))
     {:message "OK"}))
 
-(defn dispatch [handler states]
-  (fn [request]
-    (if-let [state (-> request :message :target states)]
-      (handler (assoc request :state state))
+(defn route [handler states]
+  (fn [req]
+    (if-let [state (-> req :message :target states)]
+      (handler (assoc req :state state))
       {:message "Target Not Found"})))

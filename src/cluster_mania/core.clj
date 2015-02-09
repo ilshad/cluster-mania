@@ -13,7 +13,7 @@
         secret (security/secret)]
     (server/start (:server-port conf)
       (-> state/handler
-          (state/dispatch states)
+          (state/route states)
           (security/authorize secret)
           message/parse
           log/log))))
